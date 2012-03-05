@@ -15,6 +15,37 @@ our %settings = do "./.zeppelin.config";
 
 our $zeppelin_version = "0.5.1";
 
+if (!$settings{db}) {
+	print "Database type undefined.\n";
+	if ($settings{db} =~ m/mysql/) {
+		if (!$settings{mysqlhost}) {
+			print "MySQL host undefined.\n";
+			} 
+		if (!$settings{mysqluser}) {
+			print "MySQL user undefined.\n";
+			} 
+		if (!$settings{mysqlpass}) {
+			print "MySQL pass undefined.\n";
+			}
+	} elsif ($settings{db} =~ m/sqlite/) {
+		if (!$settings{sqlitedb}) {
+			print "SQLite database undefined.\n";
+			}
+		}
+	} 
+if (!$settings{apiuser}) {
+	print "API user undefined.\n";
+	}
+if (!$settings{apikey}) {
+	print "API key undefined.\n";
+	}
+if (!$settings{account}) {
+	print "Cloud account # undefined.\n";
+	}
+if (!$settings{lbloc}) {
+	print "Load balancer location undefined.\n";
+	}
+
 sub DBConnect {
 	if ($settings{db} =~ m/sqlite/i) {
 		# Connect to SQLite database:
@@ -199,7 +230,6 @@ sub UpdateDB {
 				$server_check->execute();
 				my $check = $server_check->fetchrow_hashref();
 				if ($check->{'count'} == 0) {
-#					our ($distro_checksum, $name, $distro_id);
 					print " Adding: $distro_checksum\n";
 					my $server_add = $db->prepare("INSERT INTO distros ( id, distro, sum ) VALUES ('$distro_id', '$name', '$distro_checksum')");
 					$server_add->execute();
@@ -322,22 +352,16 @@ sub UpdateDB {
 	our @add_servers = grep { my $x = $_; not grep { $x =~ /\Q$_/i } our @existing_servers } our @new_servers;
 	our @del_servers = grep { my $x = $_; not grep { $x =~ /\Q$_/i } @new_servers } our @existing_servers;
 	my $diff_servers = @add_servers + @del_servers;
-	print "diff_servers:\t$diff_servers\n";
 	our @add_backups = grep { my $x = $_; not grep { $x =~ /\Q$_/i } our @existing_backups } our @new_backups;
 	our @del_backups = grep { my $x = $_; not grep { $x =~ /\Q$_/i } @new_backups } our @existing_backups;
 	my $diff_backups = @add_backups + @del_backups;
-	print "diff_backups:\t$diff_backups\n";
 	our @add_distros = grep { my $x = $_; not grep { $x =~ /\Q$_/i } our @existing_distros } our @new_distros;
 	our @del_distros = grep { my $x = $_; not grep { $x =~ /\Q$_/i } @new_distros } our @existing_distros;
 	my $diff_distros = @add_distros + @del_distros;
-	print "diff_distros:\t$diff_distros\n";
 	our @add_flavors = grep { my $x = $_; not grep { $x =~ /\Q$_/i } our @existing_flavors } our @new_flavors;
 	our @del_flavors = grep { my $x = $_; not grep { $x =~ /\Q$_/i } @new_flavors } our @existing_flavors;
 	my $diff_flavors = @add_flavors + @del_flavors;
-	print "diff_flavors:\t$diff_flavors\n";
 	my $diff = $diff_servers + $diff_backups + $diff_distros + $diff_flavors;
-#	print "dadd:\t@add_distros\nddel:\t@del_distros\ndnew:\t@new_distros\ndext:\t@existing_distros\n";
-#	print "badd:\t@add_backups\nbdel:\t@del_backups\nbnew:\t@new_backups\nbext:\t@existing_backups\n";
 	print "Checking database...\n";
 	if ( $diff > 0 ) {
 		print "Updating database...\n";
@@ -443,7 +467,6 @@ sub CreateServer {
 		my $build = $new_server->create_server();
 		my $root_password = $build->adminpass;
 		my @build_server = $cs->get_server_detail();
-#		my $check_build = ( grep { $_->name eq $create_server_hostname } @build_server )[0];	
 		do {
 			&ClearScreen();
 			print "Building server id: ", $build->id, "\n\tHostname: ", $build->name, "\n";
@@ -479,8 +502,6 @@ sub CreateServer {
 	print "Choose a distro:\n\n";
 	&ListDistros();
 	my $create_server_distro;
-#	print "\nSelection #: ";
-#	chomp(our $create_server_distro = <>);
 	do {
 		print "\nSelection #: ";
 		chomp(our $create_server_distro = <>);	
@@ -579,8 +600,8 @@ sub Wait {
 	}
 
 sub ClearScreen {
-#	print "\033[2J";
-#	print "\033[0;0H";
+	print "\033[2J";
+	print "\033[0;0H";
 	}
 
 sub MainMenu {
