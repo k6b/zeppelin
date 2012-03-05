@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use DBI;
-#use DBD::mysql;
+use DBD::mysql;
 use Digest::MD5 qw(md5_hex);
 use JSON;
 use LWP::UserAgent;
@@ -12,8 +12,6 @@ use Net::RackSpace::CloudServers;
 use Net::RackSpace::CloudServers::Server;
 
 our %settings = do "./.zeppelin.config";
-
-our $zeppelin_version = "0.5.1";
 
 if (!$settings{db}) {
 	print "Database type undefined.\n";
@@ -72,6 +70,7 @@ my $cs = Net::RackSpace::CloudServers->new( user => $settings{apiuser}, key => $
 
 our $identity = LWP::UserAgent->new;
 $identity->agent("Zeppelin/$zeppelin_version");
+our $zeppelin_version = "0.5.2";
 
 # us api endpoint
 our $api_url = 'https://auth.api.rackspacecloud.com/v1.0';
