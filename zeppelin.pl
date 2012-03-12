@@ -11,7 +11,7 @@ use LWP::UserAgent;
 use Net::RackSpace::CloudServers;
 use Net::RackSpace::CloudServers::Server;
 
-our %settings = do "./.zeppelin.config";
+our %settings = do "ENV{HOME}/zeppelin/.zeppelin.config";
 
 if (!$settings{db}) {
 	print "Database type undefined.\n";
@@ -527,7 +527,7 @@ sub DeleteServer {
 		&DBDisconnect();
 		my @servers = $cs->get_server_detail;
 		my $server_to_delete_id;
-		my $delete_server = ( grep { $_->id == $server_to_delete_id } @servers )[0];
+		our $delete_server = ( grep { $_->id == $server_to_delete_id } @servers )[0];
 		if ( !defined $delete_server ) {
 			print "\nNo server by that id.\n";
 			sleep 1;
