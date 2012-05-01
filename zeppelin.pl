@@ -4,14 +4,14 @@ use strict;
 use warnings;
 
 use DBI;
-use DBD::mysql;
+#use DBD::mysql;
 use Digest::MD5 qw(md5_hex);
 use JSON;
 use LWP::UserAgent;
 use Net::RackSpace::CloudServers;
 use Net::RackSpace::CloudServers::Server;
 
-our %settings = do "ENV{HOME}/zeppelin/.zeppelin.config";
+our %settings = do "$ENV{HOME}/zeppelin/.zeppelin.config";
 
 if (!$settings{db}) {
 	print "Database type undefined.\n";
@@ -68,9 +68,9 @@ sub DBDisconnect {
 
 my $cs = Net::RackSpace::CloudServers->new( user => $settings{apiuser}, key => $settings{apikey} );
 
+our $zeppelin_version = "0.5.2";
 our $identity = LWP::UserAgent->new;
 $identity->agent("Zeppelin/$zeppelin_version");
-our $zeppelin_version = "0.5.2";
 
 # us api endpoint
 our $api_url = 'https://auth.api.rackspacecloud.com/v1.0';
@@ -445,6 +445,7 @@ sub ListFlavors {
 sub CreateServer {
 	sub MakeServer {
 		my ($create_server_hostname, $create_server_flavor, $create_server_distro);
+		print "\nhostname:\t$create_server_hostname\nflavor:\t$create_server_flavor\ndistro:\t$create_server_distro";
 		my $new_server = Net::RackSpace::CloudServers::Server->new(
 			cloudservers	=> 	$cs,
 			name		=> 	$create_server_hostname,
@@ -504,14 +505,15 @@ sub CreateServer {
 	do {
 		print "\nSelection #: ";
 		chomp(our $create_server_distro = <>);	
-	} while (!$create_server_distro);
+	} while (undef $create_server_distro);
 	&ClearScreen();
 	print "\nChoose the server's size\n\n";
 	&ListFlavors();
 	print "\nSelection #: ";
 	chomp(our $create_server_flavor = <>);
-	print "Hostname: ";
+	print "\nHostname: ";
 	chomp(our $create_server_hostname = <>);
+
 	&ClearScreen();
 	&MakeServer();
 	}
